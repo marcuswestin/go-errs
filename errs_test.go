@@ -39,6 +39,14 @@ func TestNilInfo(t *testing.T) {
 	assert(t, err.Info("Foo") == nil)
 }
 
+func TestAllInfo(t *testing.T) {
+	err := errs.New(errs.Info{"Foo": "Bar"})
+	err = errs.Wrap(err, errs.Info{"Cat": "Mat"})
+	assert(t, err.AllInfo()["Foo"] == "Bar")
+	assert(t, err.AllInfo()["Cat"] == "Mat")
+	assert(t, err.AllInfo()["Woot"] == nil)
+}
+
 func TestMultiWrap(t *testing.T) {
 	publicMsg := "publicMsg"
 	err := errs.New(errs.Info{"Key": "First"}, publicMsg)

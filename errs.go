@@ -61,6 +61,9 @@ type Err interface {
 	// e.g `errs.Wrap(sqlError, { "SqlString":sqlStr, "SqlArgs":sqlArgs })`
 	Info(name string) interface{}
 
+	// AllInfo returns all info key-value-pairs passed through errs.New or errs.Wrap
+	AllInfo() Info
+
 	// LogString returns a string suitable for logging
 	LogString() string
 }
@@ -123,6 +126,7 @@ func (e *err) StdError() error   { return e.stdErr }
 func (e *err) PublicMsg() string { return e.publicMsg }
 func (e *err) Error() string     { return e.LogString() }
 func (e *err) String() string    { return e.LogString() }
+func (e *err) AllInfo() Info     { return e.info }
 
 // Implements Err
 func (e *err) Info(key string) interface{} {
