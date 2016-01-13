@@ -1,5 +1,5 @@
 // Package errs improves on the standard `error` by encapsulating stack traces, timestamps,
-// optional internal information, and optional public user-facing messages
+// optional internal information, and optional public user-facing messages.
 //
 // Usage
 //
