@@ -2,7 +2,6 @@ package errs_test
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"testing"
 
@@ -55,7 +54,6 @@ func TestMultiWrap(t *testing.T) {
 	assert(t, err.Info("Key") == "First")
 	assert(t, err.Info("Key_duplicate") == "Second")
 	assert(t, err.Info("Key_duplicate_duplicate") == "Third")
-	fmt.Println("ASDASD", err.PublicMsg())
 	assert(t, err.PublicMsg() == strings.Join([]string{publicMsg, publicMsg, publicMsg}, " - "))
 }
 

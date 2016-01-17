@@ -81,7 +81,6 @@ func Wrap(stdErr error, info Info, publicMsg ...interface{}) Err {
 	}
 	if errsErr, isErr := IsErr(stdErr); isErr {
 		if errs_err, isErrsErr := errsErr.(*err); isErrsErr {
-			fmt.Println("ASDASDASD", errs_err.info)
 			errs_err.mergeIn(info, publicMsg)
 			return errs_err
 		}
