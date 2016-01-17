@@ -23,10 +23,10 @@
 //
 // Wrap a standard error:
 //
-//  stdErr := errors.New("An error")
-//  err := errs.Wrap(stdErr, errs.Info{"Foo": "Bar"}, "User message")
+//  err := errors.New("An error")
+//  err = errs.Wrap(err, errs.Info{"Foo": "Bar"}, "User message")
 //  ...
-//  err.StdError() // stdErr
+//  err.WrappedErr().Error() == "An error"
 package errs
 
 import (
@@ -73,31 +73,31 @@ func New(info Info, publicMsg ...interface{}) Err {
 	return newErr(nil, info, publicMsg)
 }
 
-// Wrap creates a new Err with the given standard error, Info, and optional public message.
-// If stdErr is nil, Wrap returns nil.
-func Wrap(stdErr error, info Info, publicMsg ...interface{}) Err {
-	if stdErr == nil {
+// Wrap the given error in an errs.Err. If err is nil, Wrap returns nil.
+// Use Err.WrappedError for direct access to the wrapped error.
+func Wrap(wrapErr error, info Info, publicMsg ...interface{}) Err {
+	if wrapErr == nil {
 		return nil
 	}
-	if errsErr, isErr := IsErr(stdErr); isErr {
+	if errsErr, isErr := IsErr(wrapErr); isErr {
 		if errs_err, isErrsErr := errsErr.(*err); isErrsErr {
 			errs_err.mergeIn(info, publicMsg)
 			return errs_err
 		}
 		return errsErr
 	}
-	return newErr(stdErr, info, publicMsg)
+	return newErr(wrapErr, info, publicMsg)
 }
 
-// Info allows for associating internal info with an error,
+// Info allows for associating key-value-pair info with an error for debugging,
 // e.g `errs.Wrap(sqlError, { "SqlString":sqlStr, "SqlArgs":sqlArgs })`
 type Info map[string]interface{}
 
-// IsErr checks if stdErr is an Err, and return it as an Err if it is.
-// This is equivalent to stdErr.(errs.Err)
-func IsErr(stdErr error) (err Err, isErr bool) {
-	err, isErr = stdErr.(Err)
-	return
+// IsErr checks if err is an errs.Err, and return it as an errs.Err if it is.
+// This is equivalent to err.(errs.Err)
+func IsErr(err error) (Err, bool) {
+	errsErr, isErr := err.(Err)
+	return errsErr, isErr
 }
 
 // Internal
@@ -112,10 +112,10 @@ type err struct {
 	publicMsg  string
 }
 
-func newErr(stdErr error, info Info, publicMsgParts []interface{}) Err {
+func newErr(wrappedErr error, info Info, publicMsgParts []interface{}) Err {
 	publicMsg := fmt.Sprint(publicMsgParts...)
 	stack := debug.Stack()
-	return &err{stack, time.Now(), stdErr, info, publicMsg}
+	return &err{stack, time.Now(), wrappedErr, info, publicMsg}
 }
 
 // Implements Err
@@ -157,7 +157,8 @@ func (e *err) mergeIn(info Info, publicMsgParts []interface{}) {
 	e.publicMsg = fmt.Sprint(publicMsgParts...) + " - " + e.publicMsg
 }
 
-// Get the string representation of the stdErr, or an empty string if stdErr is nil
+// Get the string representation of the wrapper error,
+// or an empty string if wrappedErr is nil
 func (e *err) wrappedErrStr() string {
 	if e == nil {
 		return ""
