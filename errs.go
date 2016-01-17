@@ -46,8 +46,8 @@ type Err interface {
 	// Time returns the time.Time at which this Err was created.
 	Time() time.Time
 
-	// If errs.Wrap was used then StdError return the wrapped standard error.
-	StdError() error
+	// If errs.Wrap was used then WrappedError returns the wrapped error.
+	WrappedError() error
 
 	// If errs.Wrap or errs.New was called with any publicMsg values
 	// then PublicMsg returns a string representation of those values.
@@ -105,11 +105,11 @@ func IsErr(stdErr error) (err Err, isErr bool) {
 
 // err implements Err
 type err struct {
-	stack     []byte
-	time      time.Time
-	stdErr    error
-	info      Info
-	publicMsg string
+	stack      []byte
+	time       time.Time
+	wrappedErr error
+	info       Info
+	publicMsg  string
 }
 
 func newErr(stdErr error, info Info, publicMsgParts []interface{}) Err {
@@ -119,13 +119,13 @@ func newErr(stdErr error, info Info, publicMsgParts []interface{}) Err {
 }
 
 // Implements Err
-func (e *err) Stack() []byte     { return e.stack }
-func (e *err) Time() time.Time   { return e.time }
-func (e *err) StdError() error   { return e.stdErr }
-func (e *err) PublicMsg() string { return e.publicMsg }
-func (e *err) Error() string     { return e.LogString() }
-func (e *err) String() string    { return e.LogString() }
-func (e *err) AllInfo() Info     { return e.info }
+func (e *err) Stack() []byte       { return e.stack }
+func (e *err) Time() time.Time     { return e.time }
+func (e *err) WrappedError() error { return e.wrappedErr }
+func (e *err) PublicMsg() string   { return e.publicMsg }
+func (e *err) Error() string       { return e.LogString() }
+func (e *err) String() string      { return e.LogString() }
+func (e *err) AllInfo() Info       { return e.info }
 
 // Implements Err
 func (e *err) Info(key string) interface{} {
@@ -140,7 +140,7 @@ func (e *err) LogString() string {
 	return fmt.Sprint("Error",
 		"| Time:", e.time,
 		"| Stack:", string(e.stack),
-		"| StdError:", e.stdErrStr(),
+		"| StdError:", e.wrappedErrStr(),
 		"| Info:["+fmt.Sprint(e.info)+"]",
 		"| PublicMsg:", e.publicMsg,
 	)
@@ -158,12 +158,12 @@ func (e *err) mergeIn(info Info, publicMsgParts []interface{}) {
 }
 
 // Get the string representation of the stdErr, or an empty string if stdErr is nil
-func (e *err) stdErrStr() string {
+func (e *err) wrappedErrStr() string {
 	if e == nil {
 		return ""
 	}
-	if e.stdErr == nil {
+	if e.wrappedErr == nil {
 		return ""
 	}
-	return e.stdErr.Error()
+	return e.wrappedErr.Error()
 }

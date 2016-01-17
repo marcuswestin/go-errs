@@ -12,7 +12,7 @@ func TestNew(t *testing.T) {
 	err := errs.New(nil)
 	assert(t, err.Time().Nanosecond() != 0, "Expected non-0 time")
 	assert(t, err.Stack() != nil, "Expected non-nil time")
-	assert(t, err.StdError() == nil, "Expected nil stdError")
+	assert(t, err.WrappedError() == nil, "Expected nil stdError")
 	assert(t, err.PublicMsg() == "", "Expected no public message")
 }
 
@@ -24,8 +24,8 @@ func TestInfo(t *testing.T) {
 func TestWrap(t *testing.T) {
 	stdErr := errors.New("It broke!")
 	err := errs.Wrap(stdErr, nil)
-	assert(t, err.StdError() != nil, "Expected a standard error")
-	assert(t, err.StdError().Error() == "It broke!", "Expected standard error message to be It broke!")
+	assert(t, err.WrappedError() != nil, "Expected a wrapped error")
+	assert(t, err.WrappedError().Error() == "It broke!", "Expected wrapped error message to be It broke!")
 }
 
 func TestWrapNil(t *testing.T) {
