@@ -113,7 +113,7 @@ type err struct {
 }
 
 func newErr(wrappedErr error, info Info, publicMsgParts []interface{}) Err {
-	publicMsg := fmt.Sprint(publicMsgParts...)
+	publicMsg := concatArgs(publicMsgParts...)
 	stack := debug.Stack()
 	return &err{stack, time.Now(), wrappedErr, info, publicMsg}
 }
@@ -137,11 +137,11 @@ func (e *err) Info(key string) interface{} {
 
 // Implements Err
 func (e *err) LogString() string {
-	return fmt.Sprint("Error",
+	return concatArgs("Error",
 		"| Time:", e.time,
 		"| Stack:", string(e.stack),
 		"| StdError:", e.wrappedErrStr(),
-		"| Info:["+fmt.Sprint(e.info)+"]",
+		"| Info:["+concatArgs(e.info)+"]",
 		"| PublicMsg:", e.publicMsg,
 	)
 }
@@ -154,7 +154,14 @@ func (e *err) mergeIn(info Info, publicMsgParts []interface{}) {
 		}
 		e.info[key] = val
 	}
-	e.publicMsg = fmt.Sprint(publicMsgParts...) + " - " + e.publicMsg
+	publicMsgPrefix := concatArgs(publicMsgParts...)
+	if publicMsgPrefix == "" {
+		// do nothing
+	} else if e.publicMsg == "" {
+		e.publicMsg = publicMsgPrefix
+	} else {
+		e.publicMsg = publicMsgPrefix + " - " + e.publicMsg
+	}
 }
 
 // Get the string representation of the wrapper error,
@@ -167,4 +174,11 @@ func (e *err) wrappedErrStr() string {
 		return ""
 	}
 	return e.wrappedErr.Error()
+}
+
+// Helper to concatenate arguments into a string,
+// with spaces between the arguments
+func concatArgs(args ...interface{}) string {
+	res := fmt.Sprintln(args...)
+	return res[0 : len(res)-1] // Remove newline at the end
 }
