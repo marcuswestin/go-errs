@@ -35,6 +35,7 @@ import (
 	"time"
 )
 
+// Err is a richer error interface
 type Err interface {
 	// Error is an alias for LogString.
 	// (errs.Err implements the error interface).
@@ -80,9 +81,9 @@ func Wrap(wrapErr error, info Info, publicMsg ...interface{}) Err {
 		return nil
 	}
 	if errsErr, isErr := IsErr(wrapErr); isErr {
-		if errs_err, isErrsErr := errsErr.(*err); isErrsErr {
-			errs_err.mergeIn(info, publicMsg)
-			return errs_err
+		if errStructErr, isErrsErr := errsErr.(*err); isErrsErr {
+			errStructErr.mergeIn(info, publicMsg)
+			return errStructErr
 		}
 		return errsErr
 	}

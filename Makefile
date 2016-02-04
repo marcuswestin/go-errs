@@ -1,5 +1,12 @@
-test:
-	go test . -v
+test: lint vet
+	go test -v .
 
-test-race:
-	go test --race -v github.com/marcuswestin/go-errs
+test-race: test
+	go test --race -v .
+
+lint:
+	golint .
+	test -z "$$(golint .)"
+
+vet:
+	go vet .

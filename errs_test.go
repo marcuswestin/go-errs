@@ -60,6 +60,6 @@ func TestMultiWrap(t *testing.T) {
 func assert(t *testing.T, ok bool, msg ...interface{}) {
 	if !ok {
 		panic(msg)
-		t.Fatal(msg...)
+		// t.Fatal(msg...)
 	}
 }
