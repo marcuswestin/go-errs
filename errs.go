@@ -102,6 +102,10 @@ func UserError(info Info, publicMsg ...interface{}) Err {
 	return newErr(nil, true, info, publicMsg)
 }
 
+// Format creates and wraps an error with the given error string. Equivalent to:
+// `errs.Wrap(fmt.Errorf(format, args...))`
+func Format(info Info, format string, argv ...interface{}) Err {
+	return newErr(fmt.Errorf(format, argv...), false, info, nil)
 }
 
 // Info allows for associating key-value-pair info with an error for debugging,
