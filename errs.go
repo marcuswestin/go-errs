@@ -67,11 +67,17 @@ type Err interface {
 
 	// LogString returns a string suitable for logging
 	LogString() string
+
+	// IsUserError returns false if it was created with errs.UserError.
+	// Useful for e.g escaping out of a call stack but not logging it as
+	// an unexpected/critical error,
+	// e.g `errs.UserError(nil, "Wrong username/password")`
+	IsUserError() bool
 }
 
 // New creates a new Err with the given Info and optional public message
 func New(info Info, publicMsg ...interface{}) Err {
-	return newErr(nil, info, publicMsg)
+	return newErr(nil, false, info, publicMsg)
 }
 
 // Wrap the given error in an errs.Err. If err is nil, Wrap returns nil.
@@ -87,7 +93,15 @@ func Wrap(wrapErr error, info Info, publicMsg ...interface{}) Err {
 		}
 		return errsErr
 	}
-	return newErr(wrapErr, info, publicMsg)
+	return newErr(wrapErr, false, info, publicMsg)
+}
+
+// UserError creates an errs.Err which returns true for IsUserError().
+// See Err.IsUserError
+func UserError(info Info, publicMsg ...interface{}) Err {
+	return newErr(nil, true, info, publicMsg)
+}
+
 }
 
 // Info allows for associating key-value-pair info with an error for debugging,
@@ -109,14 +123,15 @@ type err struct {
 	stack      []byte
 	time       time.Time
 	wrappedErr error
+	isUserErr  bool
 	info       Info
 	publicMsg  string
 }
 
-func newErr(wrappedErr error, info Info, publicMsgParts []interface{}) Err {
+func newErr(wrappedErr error, isUserErr bool, info Info, publicMsgParts []interface{}) Err {
 	publicMsg := concatArgs(publicMsgParts...)
 	stack := debug.Stack()
-	return &err{stack, time.Now(), wrappedErr, info, publicMsg}
+	return &err{stack, time.Now(), wrappedErr, isUserErr, info, publicMsg}
 }
 
 // Implements Err
@@ -127,6 +142,7 @@ func (e *err) PublicMsg() string   { return e.publicMsg }
 func (e *err) Error() string       { return e.LogString() }
 func (e *err) String() string      { return e.LogString() }
 func (e *err) AllInfo() Info       { return e.info }
+func (e *err) IsUserError() bool   { return e.isUserErr }
 
 // Implements Err
 func (e *err) Info(key string) interface{} {
