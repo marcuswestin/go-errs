@@ -160,10 +160,10 @@ func (e *err) Info(key string) interface{} {
 func (e *err) LogString() string {
 	return concatArgs("Error",
 		"| Time:", e.time,
-		"| Stack:", string(e.stack),
 		"| StdError:", e.wrappedErrStr(),
 		"| Info:["+concatArgs(e.info)+"]",
 		"| PublicMsg:", e.publicMsg,
+		"| Stack:", string(e.stack),
 	)
 }
 
