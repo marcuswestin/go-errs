@@ -86,6 +86,9 @@ func Wrap(wrapErr error, info Info, publicMsg ...interface{}) Err {
 	if wrapErr == nil {
 		return nil
 	}
+	if info == nil {
+		info = Info{}
+	}
 	if errsErr, isErr := IsErr(wrapErr); isErr {
 		if errStructErr, isErrsErr := errsErr.(*err); isErrsErr {
 			errStructErr.mergeIn(info, publicMsg)
