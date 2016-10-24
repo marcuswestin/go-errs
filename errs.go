@@ -77,7 +77,7 @@ type Err interface {
 
 // New creates a new Err with the given Info and optional public message
 func New(info Info, publicMsg ...interface{}) Err {
-	return newErr(nil, false, info, publicMsg)
+	return newErr(debug.Stack(), nil, false, info, publicMsg)
 }
 
 // Wrap the given error in an errs.Err. If err is nil, Wrap returns nil.
@@ -96,19 +96,19 @@ func Wrap(wrapErr error, info Info, publicMsg ...interface{}) Err {
 		}
 		return errsErr
 	}
-	return newErr(wrapErr, false, info, publicMsg)
+	return newErr(debug.Stack(), wrapErr, false, info, publicMsg)
 }
 
 // UserError creates an errs.Err which returns true for IsUserError().
 // See Err.IsUserError
 func UserError(info Info, publicMsg ...interface{}) Err {
-	return newErr(nil, true, info, publicMsg)
+	return newErr(debug.Stack(), nil, true, info, publicMsg)
 }
 
 // Format creates and wraps an error with the given error string. Equivalent to:
 // `errs.Wrap(fmt.Errorf(format, args...))`
 func Format(info Info, format string, argv ...interface{}) Err {
-	return newErr(fmt.Errorf(format, argv...), false, info, nil)
+	return newErr(debug.Stack(), fmt.Errorf(format, argv...), false, info, nil)
 }
 
 // Info allows for associating key-value-pair info with an error for debugging,
@@ -135,9 +135,8 @@ type err struct {
 	publicMsg  string
 }
 
-func newErr(wrappedErr error, isUserErr bool, info Info, publicMsgParts []interface{}) Err {
+func newErr(stack []byte, wrappedErr error, isUserErr bool, info Info, publicMsgParts []interface{}) Err {
 	publicMsg := concatArgs(publicMsgParts...)
-	stack := debug.Stack()
 	return &err{stack, time.Now(), wrappedErr, isUserErr, info, publicMsg}
 }
 
