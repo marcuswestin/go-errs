@@ -1,7 +1,7 @@
 # Tests
 #######
 
-test-ci: vet run-tests
+test-ci: test
 test: lint vet run-tests
 lint:
 	golint -set_exit_status .
