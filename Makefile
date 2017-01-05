@@ -1,10 +1,12 @@
 # Tests
 #######
 
-test: lint vet
-	go test --race -v .
+test-ci: vet run-tests
+test: lint vet run-tests
 lint:
 	golint -set_exit_status .
+run-tests:
+	go test --race -v .
 vet:
 	go vet .
 

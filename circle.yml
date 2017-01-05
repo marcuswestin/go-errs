@@ -4,4 +4,4 @@
 
 test:
   override:
-    - make test
+    - make test-ci
